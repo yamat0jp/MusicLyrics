@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "name": "MusicLyrics",
   "description": "歌詞ファイルを読み込んで表示させるコンポーネント",
-  "repository": "https://github.com/yourname/yourrepo"
+  "repository": "https://github.com/yamat0jp/MusicLyrics"
 }

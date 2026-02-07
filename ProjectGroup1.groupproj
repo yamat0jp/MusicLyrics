@@ -1,12 +1,12 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{41C6D09A-8B22-4BF3-839A-F7C928CB7773}</ProjectGuid>
+        <ProjectGuid>{FA9D1C6E-4876-4607-BC8E-5233D7B5BA31}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
         <Projects Include="Music.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Project1.dproj">
+        <Projects Include="sample\Project1.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -27,13 +27,13 @@
         <MSBuild Projects="Music.dproj" Targets="Make"/>
     </Target>
     <Target Name="Project1">
-        <MSBuild Projects="Project1.dproj"/>
+        <MSBuild Projects="sample\Project1.dproj"/>
     </Target>
     <Target Name="Project1:Clean">
-        <MSBuild Projects="Project1.dproj" Targets="Clean"/>
+        <MSBuild Projects="sample\Project1.dproj" Targets="Clean"/>
     </Target>
     <Target Name="Project1:Make">
-        <MSBuild Projects="Project1.dproj" Targets="Make"/>
+        <MSBuild Projects="sample\Project1.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
         <CallTarget Targets="Music;Project1"/>
