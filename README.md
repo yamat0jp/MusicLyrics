@@ -3,4 +3,5 @@
 ファイルの作成は手作業で行うものとなります。
 
 #DelphinusPackage
+
 Delphinus-Support

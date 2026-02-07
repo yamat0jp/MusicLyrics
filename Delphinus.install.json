@@ -1,10 +1,14 @@
- {
+{
   "install": [
     {
-      "type": "build",
-      "project": "Music.dproj",
-      "platforms": ["Win32", "Win64"],
-      "config": "Release"
+      "source": "Source",
+      "target": "$(BDSCOMMONDIR)\\Source\\MusicLyrics",
+      "filter": "*.pas"
+    },
+    {
+      "source": "Source",
+      "target": "$(BDSCOMMONDIR)\\Source\\MusicLyrics",
+      "filter": "*.dfm"
     }
   ]
 }
