@@ -1,12 +1,12 @@
 {
   "install": [
     {
-      "source": "Source",
+      "source": "",
       "target": "$(BDSCOMMONDIR)\\Source\\MusicLyrics",
       "filter": "*.pas"
     },
     {
-      "source": "Source",
+      "source": "",
       "target": "$(BDSCOMMONDIR)\\Source\\MusicLyrics",
       "filter": "*.dfm"
     }
