@@ -1,5 +1,6 @@
-# MusicLyrics
+﻿# MusicLyrics
 音楽ファイルのディレクトリに置かれた歌詞ファイルを読み込んでスクロール表示させるコンポーネントです。
 ファイルの作成は手作業で行うものとなります。
 
 #DelphinusPackage
+Delphinus-Support
