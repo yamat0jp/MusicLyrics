@@ -1,7 +1,19 @@
 ﻿{
   "id": "MusicLyrics",
   "version": "1.0.0",
-  "name": "MusicLyrics",
-  "description": "歌詞ファイルを読み込んで表示させるコンポーネント",
-  "repository": "https://github.com/yamat0jp/MusicLyrics"
+  "name": "MusicLyrics Component",
+  "description": "A Delphi VCL component that loads and scroll-displays lyrics stored in the music file directory. Includes smooth fade animations and Spotify-style synchronized lyric rendering.",
+  "repository": "https://github.com/yamat0jp/MusicLyrics",
+  "authors": [
+    "Masashi Yamato"
+  ],
+  "license": "MIT",
+  "tags": [
+    "Delphi",
+    "VCL",
+    "Lyrics",
+    "Music",
+    "UI",
+    "Component"
+  ]
 }

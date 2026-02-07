@@ -1,0 +1,10 @@
+ {
+  "install": [
+    {
+      "type": "build",
+      "project": "Music.dproj",
+      "platforms": ["Win32", "Win64"],
+      "config": "Release"
+    }
+  ]
+}
