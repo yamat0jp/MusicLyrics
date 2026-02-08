@@ -15,8 +15,10 @@ type
     MediaPlayer1: TMediaPlayer;
     Button1: TButton;
     Timer1: TTimer;
+    StyleBook1: TStyleBook;
     procedure Button1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { private êÈåæ }
   public
@@ -40,6 +42,11 @@ begin
   MediaPlayer1.Play;
   MusicLyrics1.FileOpen(MediaPlayer1.FileName);
   Timer1.Enabled := true;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  MediaPlayer1.FileName := 'E:\fuke\GitHub\MusicLyrics\Lyrics\03 Ç©ÇΩÇøÇ†ÇÈÇ‡ÇÃ.mp3';
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);

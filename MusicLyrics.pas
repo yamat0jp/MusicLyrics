@@ -17,7 +17,6 @@ type
   private
     { Private êÈåæ }
     FCurrentIndex: Integer;
-    FShowScrollBars: Boolean;
     procedure ParseLRC(const FileName: string; out Lyrics: TArray<TLyricLine>);
     procedure BuildLyricsUI(const Lyrics: TArray<TLyricLine>);
     procedure ScrollToCenter(Index: Integer);
@@ -227,7 +226,6 @@ procedure TMusicLyrics.ScrollToCenter(Index: Integer);
 var
   T: TText;
   TargetY: Single;
-  Anim: TFloatAnimation;
 begin
   T := TText(Content.Children[Index]);
 
