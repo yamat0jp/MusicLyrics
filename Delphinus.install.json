@@ -1,14 +1,25 @@
 {
+  "packages": [
+    {
+      "path": "packages/MusicLyricsR.dproj",
+      "platforms": ["Win32", "Win64"],
+      "build": true,
+      "install": true
+    },
+    {
+      "path": "packages/MusicLyricsD.dproj",
+      "platforms": ["Win32"],
+      "build": true,
+      "install": true,
+      "design": true
+    }
+  ],
+
   "install": [
     {
       "source": "",
       "target": "$(BDSCOMMONDIR)\\Source\\MusicLyrics",
-      "filter": "*.pas"
-    },
-    {
-      "source": "",
-      "target": "$(BDSCOMMONDIR)\\Source\\MusicLyrics",
-      "filter": "*.dfm"
+      "filter": "*.pas;*.dfm"
     }
   ]
 }
