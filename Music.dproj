@@ -99,6 +99,7 @@
         <DCCReference Include="rtl.dcp"/>
         <DCCReference Include="fmx.dcp"/>
         <DCCReference Include="MusicLyrics.pas"/>
+        <DCCReference Include="ImgsShow.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

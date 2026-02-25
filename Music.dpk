@@ -32,6 +32,7 @@ requires
   fmx;
 
 contains
-  MusicLyrics in 'MusicLyrics.pas';
+  MusicLyrics in 'MusicLyrics.pas',
+  ImgsShow in 'ImgsShow.pas';
 
 end.

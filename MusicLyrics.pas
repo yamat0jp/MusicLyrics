@@ -43,7 +43,7 @@ uses System.Generics.Collections, System.Generics.Defaults, FMX.Objects,
 
 procedure Register;
 begin
-  RegisterComponents('MusicFLow', [TMusicLyrics]);
+  RegisterComponents('Kainushi', [TMusicLyrics]);
 end;
 
 { TMusicLyrics }
