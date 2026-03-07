@@ -3,13 +3,12 @@ unit Thumbnails;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Threading, System.Types, System.Math,
-  System.Generics.Collections,
-  FMX.Types, FMX.Controls, FMX.Layouts,
-  FMX.Graphics, FMX.Controls.Presentation, FMX.StdCtrls;
+  System.SysUtils, System.Classes, FMX.Types, FMX.Controls, FMX.Objects,
+  FMX.Graphics, System.Threading, System.Generics.Collections, System.Types,
+  System.Math;
 
 type
-  TThumbnails = class(TPanel)
+  TThumbnails = class(TPaintBox)
   private
     { Private éŒ¾ }
     FInnerMargin: integer;
@@ -44,12 +43,12 @@ procedure Register;
 
 implementation
 
-uses System.UIConsts;
-
 procedure Register;
 begin
   RegisterComponents('Kainushi', [TThumbnails]);
 end;
+
+{ TThumbnails }
 
 procedure TThumbnails.Cancel;
 begin
@@ -186,14 +185,15 @@ begin
     end
     else
     begin
+      X := FInnerMargin;
       Y := Y + tmp + FInnerMargin;
       tmp := bmp.Height;
       cnt := 0;
       ARects := ARects + [TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height)];
     end;
   end;
-  if (FBmps.count > 0) and FAutoSize then
-;//    Height := Max(Y + tmp + FInnerMargin, FMinSize);
+  if FAutoSize then
+    Height := Max(Y + tmp + FInnerMargin, FMinSize);
 end;
 
 end.
