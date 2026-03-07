@@ -13,14 +13,16 @@ type
   private
     { Private éŒ¾ }
     FInnerMargin: integer;
-    FSize: integer;
+    FThumbnailSize: integer;
+    FAutoSize: Boolean;
+    FMinSize: Single;
   protected
     { Protected éŒ¾ }
     FTask: ITask;
     FBmps: TObjectList<TBitmap>;
     FFiles: TStrings;
-    FMaxHeight: Single;
     procedure Paint; override;
+    procedure UpdateLayout(out ARects: TArray<TRectF>);
     function IsImageFile(const AFile: string): Boolean;
   public
     { Public éŒ¾ }
@@ -33,7 +35,8 @@ type
     property Files: TStrings read FFiles write FFiles;
   published
     { Published éŒ¾ }
-    property Size: integer read FSize write FSize;
+    property ThumbnailSize: integer read FThumbnailSize write FThumbnailSize;
+    property AutoSize: Boolean read FAutoSize write FAutoSize;
     property InnerMargin: integer read FInnerMargin write FInnerMargin;
   end;
 
@@ -65,21 +68,17 @@ begin
   inherited;
   FBmps := TObjectList<TBitmap>.Create;
   FFiles := TStringList.Create;
-  FSize := 100;
+  FThumbnailSize := 100;
   FInnerMargin := 10;
-  Align := TAlignLayout.Top;
-  if Assigned(ParentControl) then
-  begin
-    Height := ParentControl.Height;
-    FMaxHeight := ParentControl.Height;
-  end;
+  FMinSize := Height;
+  FAutoSize := true;
 end;
 
 destructor TThumbnails.Destroy;
 begin
+  Cancel;
   FBmps.Free;
   FFiles.Free;
-  Cancel;
   inherited;
 end;
 
@@ -132,10 +131,11 @@ begin
     Exit(false);
   if IsImageFile(filename) then
   begin
-    bmp := TBitmap.Create(FSize, FSize);
+    bmp := TBitmap.Create(FThumbnailSize, FThumbnailSize);
     try
       FBmps.Add(bmp);
-      bmp.LoadThumbnailFromFile(filename, FSize, FSize, false);
+      bmp.LoadThumbnailFromFile(filename, FThumbnailSize,
+        FThumbnailSize, false);
       result := true;
     except
       bmp.Free;
@@ -145,48 +145,55 @@ end;
 
 procedure TThumbnails.Paint;
 var
-  X, Y, max: Single;
-  procedure PaintRect(bmp: TBitmap);
-  var
-    rect: TRectF;
-  begin
-    rect := TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height);
-    Canvas.DrawBitmap(bmp, bmp.BoundsF, rect, 1, true);
-  end;
-
+  r: TArray<TRectF>;
 begin
   inherited;
-  if Assigned(ParentControl) then
-    Height := System.Math.max(FMaxHeight, ParentControl.Height);
-  X := FInnerMargin;
-  Y := FInnerMargin;
-  max := 0;
+  UpdateLayout(r);
   if Canvas.BeginScene then
     try
-      for var bmp in FBmps do
-        if X + bmp.Width < Width then
-        begin
-          PaintRect(bmp);
-          X := X + bmp.Width + FInnerMargin;
-          max := System.Math.max(max, bmp.Height);
-        end
-        else
-        begin
-          X := FInnerMargin;
-          Y := Y + max + FInnerMargin;
-          max := bmp.Height;
-          PaintRect(bmp);
-        end;
+      for var i := 0 to High(r) do
+        Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
       if FBmps.count = 0 then
       begin
         Canvas.Stroke.Thickness := 3;
         Canvas.DrawRect(TRectF.Create(FInnerMargin, FInnerMargin,
-          FInnerMargin + FSize, FInnerMargin + FSize), 0, 0, [], 1);
+          FInnerMargin + FThumbnailSize, FInnerMargin + FThumbnailSize), 0,
+          0, [], 1);
       end;
     finally
       Canvas.EndScene;
     end;
-  FMaxHeight := Y + max + FInnerMargin;
+end;
+
+procedure TThumbnails.UpdateLayout(out ARects: TArray<TRectF>);
+var
+  X, Y, tmp: Single;
+  cnt: integer;
+begin
+  ARects := [];
+  X := FInnerMargin;
+  Y := FInnerMargin;
+  tmp := 0;
+  cnt := 0;
+  for var bmp in FBmps do
+  begin
+    if (X + bmp.Width + FInnerMargin < Width) or (cnt = 0) then
+    begin
+      ARects := ARects + [TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height)];
+      X := X + bmp.Width + FInnerMargin;
+      tmp := Max(tmp, bmp.Height);
+      inc(cnt);
+    end
+    else
+    begin
+      Y := Y + tmp + FInnerMargin;
+      tmp := bmp.Height;
+      cnt := 0;
+      ARects := ARects + [TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height)];
+    end;
+  end;
+  if (FBmps.count > 0) and FAutoSize then
+;//    Height := Max(Y + tmp + FInnerMargin, FMinSize);
 end;
 
 end.
