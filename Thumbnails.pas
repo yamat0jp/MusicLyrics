@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, FMX.Types, FMX.Controls, FMX.Objects,
   FMX.Graphics, System.Threading, System.Generics.Collections, System.Types,
-  System.Math;
+  System.Math, FMX.Layouts;
 
 type
   TThumbnails = class(TPaintBox)
@@ -14,7 +14,7 @@ type
     FInnerMargin: integer;
     FThumbnailSize: integer;
     FAutoSize: Boolean;
-    FMinSize: Single;
+    FMinHeight: Single;
   protected
     { Protected êÈåæ }
     FTask: ITask;
@@ -37,6 +37,7 @@ type
     property ThumbnailSize: integer read FThumbnailSize write FThumbnailSize;
     property AutoSize: Boolean read FAutoSize write FAutoSize;
     property InnerMargin: integer read FInnerMargin write FInnerMargin;
+    property MinHeight: Single read FMinHeight write FMinHeight;
   end;
 
 procedure Register;
@@ -69,7 +70,7 @@ begin
   FFiles := TStringList.Create;
   FThumbnailSize := 100;
   FInnerMargin := 10;
-  FMinSize := Height;
+  FMinHeight := 600;
   FAutoSize := true;
 end;
 
@@ -152,13 +153,6 @@ begin
     try
       for var i := 0 to High(r) do
         Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
-      if FBmps.count = 0 then
-      begin
-        Canvas.Stroke.Thickness := 3;
-        Canvas.DrawRect(TRectF.Create(FInnerMargin, FInnerMargin,
-          FInnerMargin + FThumbnailSize, FInnerMargin + FThumbnailSize), 0,
-          0, [], 1);
-      end;
     finally
       Canvas.EndScene;
     end;
@@ -193,7 +187,7 @@ begin
     end;
   end;
   if FAutoSize then
-    Height := Max(Y + tmp + FInnerMargin, FMinSize);
+    Height := Max(Y + tmp + FInnerMargin, FMinHeight);
 end;
 
 end.
