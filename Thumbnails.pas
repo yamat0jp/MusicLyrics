@@ -40,14 +40,7 @@ type
     property MinHeight: Single read FMinHeight write FMinHeight;
   end;
 
-procedure Register;
-
 implementation
-
-procedure Register;
-begin
-  RegisterComponents('Kainushi', [TThumbnails]);
-end;
 
 { TThumbnails }
 

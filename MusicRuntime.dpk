@@ -1,4 +1,4 @@
-package Music;
+package MusicRuntime;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -29,15 +29,10 @@ package Music;
 
 requires
   rtl,
-  fmx,
-  designide,
-  vcl,
-  vclactnband,
-  vclx,
-  xmlrtl;
+  fmx;
 
 contains
-  MusicLyrics in 'MusicLyrics.pas',
-  Thumbnails in 'Thumbnails.pas';
+  Thumbnails in 'Thumbnails.pas',
+  MusicLyrics in 'MusicLyrics.pas';
 
 end.

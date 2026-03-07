@@ -3,13 +3,16 @@
         <ProjectGuid>{FA9D1C6E-4876-4607-BC8E-5233D7B5BA31}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="Music.dproj">
+        <Projects Include="MusicDesign.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="sample\Project1.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="sample\Project2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="MusicRuntime.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -20,14 +23,14 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="Music">
-        <MSBuild Projects="Music.dproj"/>
+    <Target Name="MusicDesign">
+        <MSBuild Projects="MusicDesign.dproj"/>
     </Target>
-    <Target Name="Music:Clean">
-        <MSBuild Projects="Music.dproj" Targets="Clean"/>
+    <Target Name="MusicDesign:Clean">
+        <MSBuild Projects="MusicDesign.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="Music:Make">
-        <MSBuild Projects="Music.dproj" Targets="Make"/>
+    <Target Name="MusicDesign:Make">
+        <MSBuild Projects="MusicDesign.dproj" Targets="Make"/>
     </Target>
     <Target Name="Project1">
         <MSBuild Projects="sample\Project1.dproj"/>
@@ -47,14 +50,23 @@
     <Target Name="Project2:Make">
         <MSBuild Projects="sample\Project2.dproj" Targets="Make"/>
     </Target>
+    <Target Name="MusicRuntime">
+        <MSBuild Projects="MusicRuntime.dproj"/>
+    </Target>
+    <Target Name="MusicRuntime:Clean">
+        <MSBuild Projects="MusicRuntime.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MusicRuntime:Make">
+        <MSBuild Projects="MusicRuntime.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Music;Project1;Project2"/>
+        <CallTarget Targets="MusicDesign;Project1;Project2;MusicRuntime"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Music:Clean;Project1:Clean;Project2:Clean"/>
+        <CallTarget Targets="MusicDesign:Clean;Project1:Clean;Project2:Clean;MusicRuntime:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Music:Make;Project1:Make;Project2:Make"/>
+        <CallTarget Targets="MusicDesign:Make;Project1:Make;Project2:Make;MusicRuntime:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

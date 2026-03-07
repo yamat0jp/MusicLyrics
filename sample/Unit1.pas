@@ -10,12 +10,12 @@ uses
 
 type
   TForm1 = class(TForm)
-    MusicLyrics1: TMusicLyrics;
     Panel1: TPanel;
     MediaPlayer1: TMediaPlayer;
     Button1: TButton;
     Timer1: TTimer;
     StyleBook1: TStyleBook;
+    MusicLyrics1: TMusicLyrics;
     procedure Button1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure FormCreate(Sender: TObject);

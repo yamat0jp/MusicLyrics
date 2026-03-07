@@ -34,17 +34,10 @@ type
     { Published éŒ¾ }
   end;
 
-procedure Register;
-
 implementation
 
 uses System.Generics.Collections, System.Generics.Defaults, FMX.Objects,
   FMX.Ani;
-
-procedure Register;
-begin
-  RegisterComponents('Kainushi', [TMusicLyrics]);
-end;
 
 { TMusicLyrics }
 
