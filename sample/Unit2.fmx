@@ -1,0 +1,52 @@
+object Form2: TForm2
+  Left = 0
+  Top = 0
+  Caption = 'Form2'
+  ClientHeight = 480
+  ClientWidth = 640
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object Panel1: TPanel
+    Align = Bottom
+    Position.Y = 360.000000000000000000
+    Size.Width = 640.000000000000000000
+    Size.Height = 120.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object Button1: TButton
+      Position.X = 280.000000000000000000
+      Position.Y = 48.000000000000000000
+      TabOrder = 0
+      Text = 'Button1'
+      TextSettings.Trimming = None
+      OnClick = Button1Click
+    end
+  end
+  object ScrollBox1: TScrollBox
+    Align = Client
+    Size.Width = 640.000000000000000000
+    Size.Height = 360.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    Viewport.Width = 624.000000000000000000
+    Viewport.Height = 344.000000000000000000
+    object Thumbnails1: TThumbnails
+      Size.Width = 640.000000000000000000
+      Size.Height = 600.000000000000000000
+      Size.PlatformDefault = False
+      OnResize = Thumbnails1Resize
+      ThumbnailSize = 100
+      AutoSize = True
+      InnerMargin = 10
+      MinHeight = 600.000000000000000000
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
+    Left = 184
+    Top = 136
+  end
+end
