@@ -46,7 +46,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  MediaPlayer1.FileName := 'E:\fuke\GitHub\MusicLyrics\Lyrics\03 ‚©‚½‚¿‚ ‚é‚à‚Ì.mp3';
+  MediaPlayer1.FileName :=
+    'E:\fuke\GitHub\2026\MusicLyrics\Lyrics\original.mp3';
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);

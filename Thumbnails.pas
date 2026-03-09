@@ -15,6 +15,7 @@ type
     FThumbnailSize: integer;
     FAutoSize: Boolean;
     FMinHeight: Single;
+    procedure SetThumbnailSize(const Value: integer);
   protected
     { Protected êÈåæ }
     FTask: ITask;
@@ -34,7 +35,7 @@ type
     property Files: TStrings read FFiles write FFiles;
   published
     { Published êÈåæ }
-    property ThumbnailSize: integer read FThumbnailSize write FThumbnailSize;
+    property ThumbnailSize: integer read FThumbnailSize write SetThumbnailSize;
     property AutoSize: Boolean read FAutoSize write FAutoSize;
     property InnerMargin: integer read FInnerMargin write FInnerMargin;
     property MinHeight: Single read FMinHeight write FMinHeight;
@@ -149,6 +150,15 @@ begin
     finally
       Canvas.EndScene;
     end;
+end;
+
+procedure TThumbnails.SetThumbnailSize(const Value: integer);
+begin
+  if FThumbnailSize <> Value then
+  begin
+    FThumbnailSize := Value;
+    Execute;
+  end;
 end;
 
 procedure TThumbnails.UpdateLayout(out ARects: TArray<TRectF>);
