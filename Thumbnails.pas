@@ -8,6 +8,8 @@ uses
   System.Math, FMX.Layouts;
 
 type
+  TPageCountEvent = procedure(Sender: TObject; cnt: integer) of object;
+
   TThumbnails = class(TPaintBox)
   private
     { Private êÈåæ }
@@ -15,6 +17,7 @@ type
     FThumbnailSize: integer;
     FAutoSize: Boolean;
     FMinHeight: Single;
+    FOnLoadFile: TPageCountEvent;
     procedure SetThumbnailSize(const Value: integer);
   protected
     { Protected êÈåæ }
@@ -39,6 +42,7 @@ type
     property AutoSize: Boolean read FAutoSize write FAutoSize;
     property InnerMargin: integer read FInnerMargin write FInnerMargin;
     property MinHeight: Single read FMinHeight write FMinHeight;
+    property OnLoadFile: TPageCountEvent read FOnLoadFile write FOnLoadFile;
   end;
 
 implementation
@@ -96,6 +100,8 @@ begin
         if OpenFile(name) then
         begin
           inc(cnt);
+          if Assigned(FOnLoadFile) then
+            FOnLoadFile(Self, cnt);
           count(5);
         end;
       TThread.Synchronize(nil, Repaint);
