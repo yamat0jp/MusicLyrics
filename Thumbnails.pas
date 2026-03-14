@@ -27,6 +27,7 @@ type
     procedure Paint; override;
     procedure UpdateLayout(out ARects: TArray<TRectF>);
     function IsImageFile(const AFile: string): Boolean;
+    procedure ReSize; override;
   public
     { Public éŒ¾ }
     constructor Create(AOwner: TComponent); override;
@@ -156,6 +157,13 @@ begin
     finally
       Canvas.EndScene;
     end;
+end;
+
+procedure TThumbnails.ReSize;
+begin
+  inherited;
+  if Height < FMinHeight then
+    Height := FMinHeight;
 end;
 
 procedure TThumbnails.SetThumbnailSize(const Value: integer);

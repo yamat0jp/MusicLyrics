@@ -32,9 +32,10 @@ object Form2: TForm2
     Size.PlatformDefault = False
     TabOrder = 2
     Viewport.Width = 624.000000000000000000
-    Viewport.Height = 344.000000000000000000
+    Viewport.Height = 360.000000000000000000
     object Thumbnails1: TThumbnails
-      Size.Width = 640.000000000000000000
+      Align = Top
+      Size.Width = 624.000000000000000000
       Size.Height = 600.000000000000000000
       Size.PlatformDefault = False
       OnResize = Thumbnails1Resize
