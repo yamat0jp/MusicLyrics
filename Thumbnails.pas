@@ -51,10 +51,7 @@ implementation
 
 uses System.UITypes;
 
-var
-  pair: array [0 .. 4] of TPair<TBitmap, TLabel>;
-
-  { TThumbnails }
+{ TThumbnails }
 
 procedure TThumbnails.Cancel;
 begin
@@ -97,42 +94,29 @@ begin
   FTask := TTask.Run(
     procedure
     var
-      id: integer;
+      pair: TPair<TBitmap, TLabel>;
     begin
-      id := FFiles.Count div 5;
-      for var i := 0 to id - 1 do
+      for var i := 0 to (FFiles.Count div 5) - 1 do
       begin
-        TParallel.For(5 * i, (i + 1) * 5 - 1,
-          procedure(int: integer)
-          begin
-            pair[int mod 5] := OpenFile(FFiles[int]);
-          end);
-        for var k := 0 to High(pair) do
+        for var k := 5 * i to 5 * i + 4 do
         begin
-          FBmps.add(pair[k].Key);
-          FLabels.add(pair[k].Value);
-        end;
-        TThread.Synchronize(nil,
-          procedure
-          begin
-            Repaint;
-            if Assigned(FOnLoadFile) then
-              FOnLoadFile(Self, (i + 1) * 5 - 1);
-          end);
-      end;
-      for var i := 5 * id to FFiles.Count - 1 do
-      begin
-        pair[0] := OpenFile(FFiles[i]);
-        FBmps.add(pair[0].Key);
-        FLabels.add(pair[0].Value);
-      end;
-      TThread.Synchronize(nil,
-        procedure
-        begin
-          Repaint;
+          pair := OpenFile(FFiles[k]);
+          FBmps.add(pair.Key);
+          FLabels.add(pair.Value);
           if Assigned(FOnLoadFile) then
-            FOnLoadFile(Self, FFiles.Count);
-        end);
+            FOnLoadFile(Self, k + 1);
+        end;
+        TThread.Synchronize(nil, Repaint);
+      end;
+      for var i := FFiles.Count - (FFiles.Count mod 5) to FFiles.Count - 1 do
+      begin
+        pair := OpenFile(FFiles[i]);
+        FBmps.add(pair.Key);
+        FLabels.add(pair.Value);
+        if Assigned(FOnLoadFile) then
+          FOnLoadFile(Self, i + 1);
+      end;
+      TThread.Synchronize(nil, Repaint);
     end);
 end;
 
@@ -254,6 +238,7 @@ begin
       tmp := bmp.Height;
       cnt := 0;
       ARects := ARects + [TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height)];
+      X := X + bmp.Width + FInnerMargin;
     end;
   end;
   if FAutoSize then
