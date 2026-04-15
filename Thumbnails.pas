@@ -36,7 +36,7 @@ type
     procedure Cancel;
     procedure Clear;
     procedure Execute; virtual;
-    function OpenFile(filename: string): Boolean; virtual;
+    function OpenFile(filename: string): TPair<TBitmap, TLabel>; virtual;
     property Files: TStrings read FFiles write FFiles;
   published
     { Published êÈåæ }
@@ -51,7 +51,10 @@ implementation
 
 uses System.UITypes;
 
-{ TThumbnails }
+var
+  pair: array [0 .. 4] of TPair<TBitmap, TLabel>;
+
+  { TThumbnails }
 
 procedure TThumbnails.Cancel;
 begin
@@ -94,24 +97,42 @@ begin
   FTask := TTask.Run(
     procedure
     var
-      cnt: integer;
-      procedure count(i: integer);
-      begin
-        if cnt mod i = 0 then
-          TThread.Synchronize(nil, Repaint);
-      end;
-
+      id: integer;
     begin
-      cnt := 0;
-      for var name in FFiles do
-        if OpenFile(name) then
+      id := FFiles.Count div 5;
+      for var i := 0 to id - 1 do
+      begin
+        TParallel.For(5 * i, (i + 1) * 5 - 1,
+          procedure(int: integer)
+          begin
+            pair[int mod 5] := OpenFile(FFiles[int]);
+          end);
+        for var k := 0 to High(pair) do
         begin
-          inc(cnt);
-          if Assigned(FOnLoadFile) then
-            FOnLoadFile(Self, cnt);
-          count(5);
+          FBmps.add(pair[k].Key);
+          FLabels.add(pair[k].Value);
         end;
-      TThread.Synchronize(nil, Repaint);
+        TThread.Synchronize(nil,
+          procedure
+          begin
+            Repaint;
+            if Assigned(FOnLoadFile) then
+              FOnLoadFile(Self, (i + 1) * 5 - 1);
+          end);
+      end;
+      for var i := 5 * id to FFiles.Count - 1 do
+      begin
+        pair[0] := OpenFile(FFiles[i]);
+        FBmps.add(pair[0].Key);
+        FLabels.add(pair[0].Value);
+      end;
+      TThread.Synchronize(nil,
+        procedure
+        begin
+          Repaint;
+          if Assigned(FOnLoadFile) then
+            FOnLoadFile(Self, FFiles.Count);
+        end);
     end);
 end;
 
@@ -129,15 +150,16 @@ begin
   result := false;
 end;
 
-function TThumbnails.OpenFile(filename: string): Boolean;
+function TThumbnails.OpenFile(filename: string): TPair<TBitmap, TLabel>;
 var
   bmp: TBitmap;
   lb: TLabel;
   setting: TTextSettings;
 begin
-  result := false;
+  result.Key := nil;
+  result.Value := nil;
   if not FileExists(filename) then
-    Exit(false);
+    Exit;
   if IsImageFile(filename) then
   begin
     lb := TLabel.Create(Self);
@@ -148,15 +170,15 @@ begin
     setting.FontColor := TAlphaColors.Indianred;
     setting.Font.Style := [TFontStyle.fsBold];
     lb.Parent := Self;
-    FLabels.Add(lb);
+    result.Value := lb;
     bmp := TBitmap.Create(FThumbnailSize, FThumbnailSize);
     try
-      FBmps.Add(bmp);
       bmp.LoadThumbnailFromFile(filename, FThumbnailSize,
         FThumbnailSize, false);
-      result := true;
+      result.Key := bmp;
     except
       bmp.Free;
+      lb.Free;
     end;
   end;
 end;
@@ -166,22 +188,28 @@ var
   r: TArray<TRectF>;
 begin
   inherited;
-  UpdateLayout(r);
-  if Canvas.BeginScene then
-    try
-      for var i := 0 to High(r) do
-      begin
-        Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
-        with FLabels[i].Position do
+  if FBmps.Count <> FLabels.Count then
+    Exit;
+  try
+    UpdateLayout(r);
+    if Canvas.BeginScene then
+      try
+        for var i := 0 to High(r) do
         begin
-          X := r[i].Left;
-          Y := r[i].Top;
+          Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
+          with FLabels[i].Position do
+          begin
+            X := r[i].Left;
+            Y := r[i].Top;
+          end;
+          FLabels[i].Width := FBmps[i].Width;
         end;
-        FLabels[i].Width := FBmps[i].Width;
+      finally
+        Canvas.EndScene;
       end;
-    finally
-      Canvas.EndScene;
-    end;
+  except
+    Execute;
+  end;
 end;
 
 procedure TThumbnails.Resize;
