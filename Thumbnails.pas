@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, FMX.Types, FMX.Controls, FMX.Objects,
   FMX.Graphics, System.Threading, System.Generics.Collections, System.Types,
-  System.Math, FMX.Layouts;
+  System.Math, FMX.Layouts, FMX.StdCtrls;
 
 type
   TPageCountEvent = procedure(Sender: TObject; cnt: integer) of object;
@@ -23,11 +23,12 @@ type
     { Protected êÈåæ }
     FTask: ITask;
     FBmps: TObjectList<TBitmap>;
+    FLabels: TObjectList<TLabel>;
     FFiles: TStrings;
     procedure Paint; override;
     procedure UpdateLayout(out ARects: TArray<TRectF>);
     function IsImageFile(const AFile: string): Boolean;
-    procedure ReSize; override;
+    procedure Resize; override;
   public
     { Public êÈåæ }
     constructor Create(AOwner: TComponent); override;
@@ -48,6 +49,8 @@ type
 
 implementation
 
+uses System.UITypes;
+
 { TThumbnails }
 
 procedure TThumbnails.Cancel;
@@ -66,6 +69,7 @@ constructor TThumbnails.Create(AOwner: TComponent);
 begin
   inherited;
   FBmps := TObjectList<TBitmap>.Create;
+  FLabels := TObjectList<TLabel>.Create;
   FFiles := TStringList.Create;
   FThumbnailSize := 100;
   FInnerMargin := 10;
@@ -77,6 +81,7 @@ destructor TThumbnails.Destroy;
 begin
   Cancel;
   FBmps.Free;
+  FLabels.Free;
   FFiles.Free;
   inherited;
 end;
@@ -85,6 +90,7 @@ procedure TThumbnails.Execute;
 begin
   Cancel;
   FBmps.Clear;
+  FLabels.Clear;
   FTask := TTask.Run(
     procedure
     var
@@ -126,12 +132,23 @@ end;
 function TThumbnails.OpenFile(filename: string): Boolean;
 var
   bmp: TBitmap;
+  lb: TLabel;
+  setting: TTextSettings;
 begin
   result := false;
   if not FileExists(filename) then
     Exit(false);
   if IsImageFile(filename) then
   begin
+    lb := TLabel.Create(Self);
+    lb.Text := ExtractFIleName(filename);
+    lb.StyledSettings := [TStyledSetting.Family, TStyledSetting.Size];
+    setting := lb.TextSettings;
+    setting.WordWrap := false;
+    setting.FontColor := TAlphaColors.Indianred;
+    setting.Font.Style := [TFontStyle.fsBold];
+    lb.Parent := Self;
+    FLabels.Add(lb);
     bmp := TBitmap.Create(FThumbnailSize, FThumbnailSize);
     try
       FBmps.Add(bmp);
@@ -153,13 +170,21 @@ begin
   if Canvas.BeginScene then
     try
       for var i := 0 to High(r) do
+      begin
         Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
+        with FLabels[i].Position do
+        begin
+          X := r[i].Left;
+          Y := r[i].Top;
+        end;
+        FLabels[i].Width := FBmps[i].Width;
+      end;
     finally
       Canvas.EndScene;
     end;
 end;
 
-procedure TThumbnails.ReSize;
+procedure TThumbnails.Resize;
 begin
   inherited;
   if Height < FMinHeight then
