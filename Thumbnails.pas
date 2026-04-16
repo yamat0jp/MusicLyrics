@@ -36,7 +36,8 @@ type
     procedure Cancel;
     procedure Clear;
     procedure Execute; virtual;
-    function OpenFile(filename: string): TPair<TBitmap, TLabel>; virtual;
+    function OpenFile(filename: string; out data: TPair<TBitmap, TLabel>)
+      : Boolean; virtual;
     property Files: TStrings read FFiles write FFiles;
   published
     { Published êÈåæ }
@@ -56,7 +57,10 @@ uses System.UITypes;
 procedure TThumbnails.Cancel;
 begin
   if Assigned(FTask) then
+  begin
     FTask.Cancel;
+    FTask := nil;
+  end;
 end;
 
 procedure TThumbnails.Clear;
@@ -95,27 +99,31 @@ begin
     procedure
     var
       pair: TPair<TBitmap, TLabel>;
+      procedure main(id: integer);
+      begin
+        TThread.Synchronize(nil,
+          procedure
+          begin
+            FBmps.add(pair.Key);
+            FLabels.add(pair.Value);
+            if Assigned(FOnLoadFile) then
+              FOnLoadFile(Self, id);
+          end);
+      end;
+
     begin
       for var i := 0 to (FFiles.Count div 5) - 1 do
       begin
         for var k := 5 * i to 5 * i + 4 do
-        begin
-          pair := OpenFile(FFiles[k]);
-          FBmps.add(pair.Key);
-          FLabels.add(pair.Value);
-          if Assigned(FOnLoadFile) then
-            FOnLoadFile(Self, k + 1);
-        end;
+          if TTask.CurrentTask.Status = TTaskStatus.Canceled then
+            Exit
+          else if OpenFile(FFiles[k], pair) then
+            main(k + 1);
         TThread.Synchronize(nil, Repaint);
       end;
       for var i := FFiles.Count - (FFiles.Count mod 5) to FFiles.Count - 1 do
-      begin
-        pair := OpenFile(FFiles[i]);
-        FBmps.add(pair.Key);
-        FLabels.add(pair.Value);
-        if Assigned(FOnLoadFile) then
-          FOnLoadFile(Self, i + 1);
-      end;
+        if OpenFile(FFiles[i], pair) then
+          main(i + 1);
       TThread.Synchronize(nil, Repaint);
     end);
 end;
@@ -134,37 +142,38 @@ begin
   result := false;
 end;
 
-function TThumbnails.OpenFile(filename: string): TPair<TBitmap, TLabel>;
+function TThumbnails.OpenFile(filename: string;
+out data: TPair<TBitmap, TLabel>): Boolean;
 var
   bmp: TBitmap;
   lb: TLabel;
   setting: TTextSettings;
 begin
-  result.Key := nil;
-  result.Value := nil;
-  if not FileExists(filename) then
-    Exit;
-  if IsImageFile(filename) then
+  if FileExists(filename) and IsImageFile(filename) then
   begin
     lb := TLabel.Create(Self);
-    lb.Text := ExtractFIleName(filename);
+    lb.Text := ExtractFileName(filename);
     lb.StyledSettings := [TStyledSetting.Family, TStyledSetting.Size];
     setting := lb.TextSettings;
     setting.WordWrap := false;
     setting.FontColor := TAlphaColors.Indianred;
     setting.Font.Style := [TFontStyle.fsBold];
     lb.Parent := Self;
-    result.Value := lb;
+    data.Value := lb;
     bmp := TBitmap.Create(FThumbnailSize, FThumbnailSize);
     try
       bmp.LoadThumbnailFromFile(filename, FThumbnailSize,
         FThumbnailSize, false);
-      result.Key := bmp;
+      data.Key := bmp;
+      result := true;
     except
       bmp.Free;
       lb.Free;
+      result := false;
     end;
-  end;
+  end
+  else
+    result := false;
 end;
 
 procedure TThumbnails.Paint;
@@ -174,26 +183,22 @@ begin
   inherited;
   if FBmps.Count <> FLabels.Count then
     Exit;
-  try
-    UpdateLayout(r);
-    if Canvas.BeginScene then
-      try
-        for var i := 0 to High(r) do
+  UpdateLayout(r);
+  if Canvas.BeginScene then
+    try
+      for var i := 0 to High(r) do
+      begin
+        Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
+        with FLabels[i].Position do
         begin
-          Canvas.DrawBitmap(FBmps[i], FBmps[i].BoundsF, r[i], 1, true);
-          with FLabels[i].Position do
-          begin
-            X := r[i].Left;
-            Y := r[i].Top;
-          end;
-          FLabels[i].Width := FBmps[i].Width;
+          X := r[i].Left;
+          Y := r[i].Top;
         end;
-      finally
-        Canvas.EndScene;
+        FLabels[i].Width := FBmps[i].Width;
       end;
-  except
-    Execute;
-  end;
+    finally
+      Canvas.EndScene;
+    end;
 end;
 
 procedure TThumbnails.Resize;
