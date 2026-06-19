@@ -30,6 +30,7 @@ type
     procedure filter(bmp: TBitmap; out data: TFontData);
     { Private êÈåæ }
   protected
+    FBuf: TBitmap;
     procedure Paint; override;
     procedure Resize; override;
     function GetEnabled: Boolean; override;
@@ -71,6 +72,7 @@ var
 
 constructor TDotMessage.Create(AOwner: TComponent);
 begin
+  FBuf := TBitmap.Create;
   inherited;
   FTimer := TTimer.Create(Self);
   FTimer.Interval := 120;
@@ -82,6 +84,7 @@ end;
 destructor TDotMessage.Destroy;
 begin
   FTimer.Free;
+  FBuf.Free;
   inherited;
 end;
 
@@ -204,9 +207,11 @@ var
 begin
   inherited;
   FSize := Height div hsize;
-  Canvas.Brush.Color := clGray;
-  Canvas.FillRect(TRect.Create(0, 0, Width, Height));
-  Canvas.Brush.Color := clWhite;
+  if Assigned(FBuf) then
+    FBuf.SetSize(Width, Height);
+  FBuf.Canvas.Brush.Color := clGray;
+  FBuf.Canvas.FillRect(BoundsRect);
+  FBuf.Canvas.Brush.Color := clWhite;
   for var k := List.Count - 1 downto 0 do
   begin
     obj := List[k];
@@ -218,10 +223,11 @@ begin
         st := obj.Start;
         if obj.data[i, j] <> clWhite then
           continue;
-        Canvas.Ellipse(TRect.Create((i + st) * FSize, j * FSize,
+        FBuf.Canvas.FillRect(TRect.Create((i + st) * FSize, j * FSize,
           (i + st + 1) * FSize, (j + 1) * FSize));
       end;
   end;
+  Canvas.Draw(0, 0, FBuf);
 end;
 
 procedure TDotMessage.Resize;
