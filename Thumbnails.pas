@@ -113,6 +113,8 @@ begin
   FImages.Clear;
   FTask := TTask.Run(
     procedure
+    const
+      max = 15;
     var
       r: TArray<TRectF>;
       cnt, k: integer;
@@ -132,7 +134,7 @@ begin
                 AddUI(FFiles[cnt])
               end);
           inc(cnt);
-          if (cnt - k < 5) and (cnt < FFiles.Count) then
+          if (cnt - k < max) and (cnt < FFiles.Count) then
             goto back;
         finally
           UpdateLayout(r);
