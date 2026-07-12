@@ -14,18 +14,18 @@ type
   private
     { Private 宣言 }
     FInnerMargin: integer;
-    FThumbnailSize: integer;
+    FThumbnailSize: Single;
     FOnLoadFile: TPageCountEvent;
-    procedure SetThumbnailSize(const Value: integer);
+    procedure SetThumbnailSize(const Value: Single);
+    procedure AddUI(const text: string);
   protected
     { Protected 宣言 }
     FTask: ITask;
     FImages: TObjectList<TImage>;
-    FLabels: TObjectList<TLabel>;
     FFiles: TStrings;
-    procedure Paint; override;
     procedure UpdateLayout(out ARects: TArray<TRectF>);
     function IsImageFile(const AFile: string): Boolean;
+    procedure Resize; override;
   public
     { Public 宣言 }
     constructor Create(AOwner: TComponent); override;
@@ -33,12 +33,10 @@ type
     procedure Cancel;
     procedure Clear;
     procedure Execute; virtual;
-    function OpenFile(filename: string; out data: TPair<TImage, TLabel>)
-      : Boolean; virtual;
     property Files: TStrings read FFiles write FFiles;
   published
     { Published 宣言 }
-    property ThumbnailSize: integer read FThumbnailSize write SetThumbnailSize;
+    property ThumbnailSize: Single read FThumbnailSize write SetThumbnailSize;
     property InnerMargin: integer read FInnerMargin write FInnerMargin;
     property OnLoadFile: TPageCountEvent read FOnLoadFile write FOnLoadFile;
   end;
@@ -48,6 +46,34 @@ implementation
 uses System.UITypes;
 
 { TThumbnails }
+
+procedure TThumbnails.AddUI(const text: string);
+var
+  img: TImage;
+  lb: TLabel;
+  setting: TTextSettings;
+begin
+  if not FileExists(text) or not IsImageFile(text) then
+    raise Exception.Create('エラー メッセージ');
+  img := TImage.Create(Self);
+  try
+    lb := TLabel.Create(img);
+    img.TagObject := lb;
+    img.TagString := text;
+    lb.Position.X := 0;
+    lb.Position.Y := 0;
+    lb.Parent := img;
+    lb.text := ExtractFileName(text);
+    lb.StyledSettings := [TStyledSetting.Family, TStyledSetting.Size];
+    setting := lb.TextSettings;
+    setting.WordWrap := false;
+    setting.FontColor := TAlphaColors.Indianred;
+    setting.Font.Style := [TFontStyle.fsBold];
+    FImages.Add(img);
+  except
+    img.Free;
+  end;
+end;
 
 procedure TThumbnails.Cancel;
 begin
@@ -68,7 +94,6 @@ constructor TThumbnails.Create(AOwner: TComponent);
 begin
   inherited;
   FImages := TObjectList<TImage>.Create;
-  FLabels := TObjectList<TLabel>.Create;
   FFiles := TStringList.Create;
   FThumbnailSize := 100;
   FInnerMargin := 10;
@@ -78,7 +103,6 @@ destructor TThumbnails.Destroy;
 begin
   Cancel;
   FImages.Free;
-  FLabels.Free;
   FFiles.Free;
   inherited;
 end;
@@ -87,39 +111,51 @@ procedure TThumbnails.Execute;
 begin
   Cancel;
   FImages.Clear;
-  FLabels.Clear;
   FTask := TTask.Run(
     procedure
     var
-      pair: TPair<TImage, TLabel>;
-      procedure main(id: integer);
-      begin
-        TThread.Synchronize(nil,
-          procedure
-          begin
-            FImages.add(pair.Key);
-            FLabels.add(pair.Value);
-            pair.Key.Parent := Self;
-            pair.Value.Parent := Self;
-            if Assigned(FOnLoadFile) then
-              FOnLoadFile(Self, id);
-          end);
-      end;
-
+      r: TArray<TRectF>;
+      cnt, k: integer;
+    label back;
     begin
-      for var i := 0 to (FFiles.Count div 5) - 1 do
-      begin
-        for var k := 5 * i to 5 * i + 4 do
+      cnt := 0;
+      while cnt < FFiles.Count do
+        try
+          k := cnt;
+        back:
           if TTask.CurrentTask.Status = TTaskStatus.Canceled then
             Exit
-          else if OpenFile(FFiles[k], pair) then
-            main(k + 1);
-        TThread.Synchronize(nil, Repaint);
-      end;
-      for var i := FFiles.Count - (FFiles.Count mod 5) to FFiles.Count - 1 do
-        if OpenFile(FFiles[i], pair) then
-          main(i + 1);
-      TThread.Synchronize(nil, Repaint);
+          else
+            TThread.Synchronize(nil,
+              procedure
+              begin
+                AddUI(FFiles[cnt])
+              end);
+          inc(cnt);
+          if (cnt - k < 5) and (cnt < FFiles.Count) then
+            goto back;
+        finally
+          UpdateLayout(r);
+          TParallel.For(k, cnt - 1,
+            procedure(i: integer)
+            begin
+              FImages[i].Bitmap.LoadThumbnailFromFile(FImages[i].TagString,
+                r[i].Width, r[i].Height, false);
+            end);
+          TThread.Synchronize(nil,
+            procedure
+            begin
+              for var i := k to cnt - 1 do
+              begin
+                FImages[i].SetBounds(r[i].Left, r[i].Top, r[i].Width,
+                  r[i].Height);
+                FImages[i].Parent := Self;
+                if Assigned(FOnLoadFile) then
+                  FOnLoadFile(FImages[i], i);
+              end;
+              Repaint;
+            end);
+        end;
     end);
 end;
 
@@ -137,71 +173,22 @@ begin
   result := false;
 end;
 
-function TThumbnails.OpenFile(filename: string;
-out data: TPair<TImage, TLabel>): Boolean;
-var
-  img: TImage;
-  lb: TLabel;
-  setting: TTextSettings;
-begin
-  if FileExists(filename) and IsImageFile(filename) then
-  begin
-    lb := TLabel.Create(Self);
-    lb.Text := ExtractFileName(filename);
-    lb.StyledSettings := [TStyledSetting.Family, TStyledSetting.Size];
-    setting := lb.TextSettings;
-    setting.WordWrap := false;
-    setting.FontColor := TAlphaColors.Indianred;
-    setting.Font.Style := [TFontStyle.fsBold];
-    data.Value := lb;
-    img := TImage.Create(Self);
-    try
-      img.Width := FThumbnailSize;
-      img.Height := FThumbnailSize;
-      img.Bitmap.LoadThumbnailFromFile(filename, FThumbnailSize,
-        FThumbnailSize, false);
-      data.Key := img;
-      result := true;
-    except
-      img.Free;
-      lb.Free;
-      result := false;
-    end;
-  end
-  else
-    result := false;
-end;
-
-procedure TThumbnails.Paint;
+procedure TThumbnails.Resize;
 var
   r: TArray<TRectF>;
 begin
   inherited;
-  if FImages.Count <> FLabels.Count then
-    Exit;
   UpdateLayout(r);
-  if Canvas.BeginScene then
-    try
-      for var i := 0 to High(r) do
-      begin
-        with FImages[i].Position do
-        begin
-          X := r[i].Left;
-          Y := r[i].Top;
-        end;
-        with FLabels[i].Position do
-        begin
-          X := r[i].Left;
-          Y := r[i].Top;
-        end;
-        FLabels[i].Width := FImages[i].Width;
-      end;
-    finally
-      Canvas.EndScene;
+  for var i := 0 to FImages.Count - 1 do
+    with FImages[i].Position do
+    begin
+      X := r[i].Left;
+      Y := r[i].Top;
     end;
+  Repaint;
 end;
 
-procedure TThumbnails.SetThumbnailSize(const Value: integer);
+procedure TThumbnails.SetThumbnailSize(const Value: Single);
 begin
   if FThumbnailSize <> Value then
   begin
@@ -212,32 +199,31 @@ end;
 
 procedure TThumbnails.UpdateLayout(out ARects: TArray<TRectF>);
 var
-  X, Y, tmp: Single;
-  cnt: integer;
+  X, Y: Single;
+  cnt, i: integer;
 begin
   ARects := [];
   X := FInnerMargin;
   Y := FInnerMargin;
-  tmp := 0;
   cnt := 0;
-  for var bmp in FImages do
+  i := 0;
+  while i < FFiles.Count do
   begin
-    if (X + bmp.Width + FInnerMargin < Width) or (cnt = 0) then
+    if (X + FThumbnailSize + FInnerMargin < Width) or (cnt = 0) then
     begin
-      ARects := ARects + [TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height)];
-      X := X + bmp.Width + FInnerMargin;
-      tmp := Max(tmp, bmp.Height);
+      ARects := ARects + [TRectF.Create(X, Y, X + FThumbnailSize,
+        Y + FThumbnailSize)];
+      X := X + FThumbnailSize + FInnerMargin;
       inc(cnt);
     end
     else
     begin
       X := FInnerMargin;
-      Y := Y + tmp + FInnerMargin;
-      tmp := bmp.Height;
+      Y := Y + FThumbnailSize + FInnerMargin;
       cnt := 0;
-      ARects := ARects + [TRectF.Create(X, Y, X + bmp.Width, Y + bmp.Height)];
-      X := X + bmp.Width + FInnerMargin;
+      continue;
     end;
+    inc(i);
   end;
 end;
 
