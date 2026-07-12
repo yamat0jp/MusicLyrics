@@ -80,6 +80,7 @@ begin
   if Assigned(FTask) then
   begin
     FTask.Cancel;
+    FTask.Wait(200);
     FTask := nil;
   end;
 end;
@@ -126,13 +127,12 @@ begin
           k := cnt;
         back:
           if TTask.CurrentTask.Status = TTaskStatus.Canceled then
-            Exit
-          else
-            TThread.Synchronize(nil,
-              procedure
-              begin
-                AddUI(FFiles[cnt])
-              end);
+            Exit;
+          TThread.Synchronize(nil,
+            procedure
+            begin
+              AddUI(FFiles[cnt])
+            end);
           inc(cnt);
           if (cnt - k < max) and (cnt < FFiles.Count) then
             goto back;
