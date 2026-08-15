@@ -116,7 +116,8 @@
         <DCCReference Include="vcl.dcp"/>
         <DCCReference Include="Thumbnails.pas"/>
         <DCCReference Include="MusicLyrics.pas"/>
-        <DCCReference Include="DotMessage.pas"/>
+        <DCCReference Include="FMXDotMess.pas"/>
+        <DCCReference Include="BaseMessage.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

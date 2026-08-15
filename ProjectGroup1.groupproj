@@ -9,9 +9,6 @@
         <Projects Include="sample\Project1.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="sample\Project2.dproj">
-            <Dependencies/>
-        </Projects>
         <Projects Include="MusicRuntime.dproj">
             <Dependencies/>
         </Projects>
@@ -41,15 +38,6 @@
     <Target Name="Project1:Make">
         <MSBuild Projects="sample\Project1.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Project2">
-        <MSBuild Projects="sample\Project2.dproj"/>
-    </Target>
-    <Target Name="Project2:Clean">
-        <MSBuild Projects="sample\Project2.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Project2:Make">
-        <MSBuild Projects="sample\Project2.dproj" Targets="Make"/>
-    </Target>
     <Target Name="MusicRuntime">
         <MSBuild Projects="MusicRuntime.dproj"/>
     </Target>
@@ -60,13 +48,13 @@
         <MSBuild Projects="MusicRuntime.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="MusicDesign;Project1;Project2;MusicRuntime"/>
+        <CallTarget Targets="MusicDesign;Project1;MusicRuntime"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="MusicDesign:Clean;Project1:Clean;Project2:Clean;MusicRuntime:Clean"/>
+        <CallTarget Targets="MusicDesign:Clean;Project1:Clean;MusicRuntime:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="MusicDesign:Make;Project1:Make;Project2:Make;MusicRuntime:Make"/>
+        <CallTarget Targets="MusicDesign:Make;Project1:Make;MusicRuntime:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

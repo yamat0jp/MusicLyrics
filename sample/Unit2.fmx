@@ -38,11 +38,12 @@ object Form2: TForm2
       Size.Width = 624.000000000000000000
       Size.Height = 600.000000000000000000
       Size.PlatformDefault = False
+      TabOrder = 0
       OnResize = Thumbnails1Resize
-      ThumbnailSize = 100
-      AutoSize = True
+      ThumbnailSize = 100.000000000000000000
       InnerMargin = 10
-      MinHeight = 600.000000000000000000
+      Viewport.Width = 624.000000000000000000
+      Viewport.Height = 600.000000000000000000
     end
   end
   object OpenDialog1: TOpenDialog

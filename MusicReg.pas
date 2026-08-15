@@ -6,11 +6,11 @@ procedure Register;
 
 implementation
 
-uses Musiclyrics, Thumbnails, DotMessage, System.Classes;
+uses Musiclyrics, Thumbnails, FMXDotMess, System.Classes;
 
 procedure Register;
 begin
-  RegisterComponents('Kainushi', [TMusiclyrics, TThumbnails, TDotMessage]);
+  RegisterComponents('Kainushi', [TMusiclyrics, TThumbnails, TFMXDotMess]);
 end;
 
 end.

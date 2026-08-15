@@ -35,6 +35,7 @@ requires
 contains
   Thumbnails in 'Thumbnails.pas',
   MusicLyrics in 'MusicLyrics.pas',
-  DotMessage in 'DotMessage.pas';
+  FMXDotMess in 'FMXDotMess.pas',
+  BaseMessage in 'BaseMessage.pas';
 
 end.
